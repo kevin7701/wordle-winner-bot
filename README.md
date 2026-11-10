@@ -27,7 +27,9 @@ it does its job, and exits. Stats live in `wins.json` (Wordle) and
 ### Connections
 
 <!-- CONNECTIONS_LEADERBOARD:START -->
-_No winners yet._
+| Player | Wins | Current streak |
+| --- | ---: | ---: |
+| lacasse | 1 | 1 |
 <!-- CONNECTIONS_LEADERBOARD:END -->
 
 ## Setup
