@@ -1,0 +1,47 @@
+name: Crown Worlde Winner
+
+# Runs once a day, just after midnight Pacific time. GitHub cron is UTC-only,
+# so 08:05 UTC is 12:05am PST in winter and 1:05am PDT in summer. Either way
+# the script looks back at the full previous Pacific day, so daylight saving
+# needs no handling here and this file never changes for it.
+on:
+  schedule:
+    - cron: "5 8 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Target day (YYYY-MM-DD) to crown instead of yesterday"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: worlde-winner
+  cancel-in-progress: false
+
+jobs:
+  crown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Crown the winner
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          GUILD_ID: ${{ secrets.GUILD_ID }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          ROLE_ID: ${{ secrets.ROLE_ID }}
+        run: python bot.py ${{ inputs.date && format('--date {0}', inputs.date) || '' }}
+      - name: Commit updated wins log and leaderboard
+        run: |
+          git config user.name "worlde-winner-bot"
+          git config user.email "worlde-winner-bot@users.noreply.github.com"
+          git add wins.json README.md
+          git diff --cached --quiet || git commit -m "Record winners for $(date -u +%F) [skip ci]"
+          git push
