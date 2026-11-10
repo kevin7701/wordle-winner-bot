@@ -74,7 +74,10 @@ never changes.
 In the repo's **Actions** tab, run the workflow manually
 ("Run workflow"). It accepts an optional date to crown a specific day,
 which is also how you backfill past winners: run it once per past day.
-Check the run log and the channel to confirm the role was assigned.
+Tick the dry run box to test without changing anything: the bot still logs
+in and scans the channel, but it changes no roles, writes no files, and
+sends no announcement, and the log shows what it would have done. Check
+the run log and the channel to confirm the role was assigned.
 
 ## Running it locally
 
@@ -88,6 +91,19 @@ python bot.py --date 2026-11-09             # crowns that day for real
 ```
 
 With no `--date`, it crowns yesterday (Pacific time).
+
+## Troubleshooting
+
+- Run stuck after "connected to Gateway" with no further logs: older versions
+  called `guild.chunk()`, which waits for Discord to send the full member
+  list and hangs if the Server Members intent is off in the Developer
+  Portal. The current code no longer calls it, so pull the latest code if
+  you see this. The script also has a 5-minute timeout, so a stuck run fails
+  loudly instead of running until GitHub kills it.
+- 403 Forbidden on role changes: the bot's own role must sit above
+  "Worlde Winner" in Server Settings > Roles, and it needs Manage Roles.
+- Run fails after 5 minutes: check the logs for the last printed step; the
+  scan prints which channel and day it is working on before it starts.
 
 ## How it works
 

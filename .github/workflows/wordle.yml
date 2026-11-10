@@ -13,6 +13,11 @@ on:
         description: "Target day (YYYY-MM-DD) to crown instead of yesterday"
         required: false
         default: ""
+      dry_run:
+        description: "Dry run: print what would happen without changing anything"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -24,6 +29,7 @@ concurrency:
 jobs:
   crown:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,7 +43,11 @@ jobs:
           GUILD_ID: ${{ secrets.GUILD_ID }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
           ROLE_ID: ${{ secrets.ROLE_ID }}
-        run: python bot.py ${{ inputs.date && format('--date {0}', inputs.date) || '' }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          python bot.py $ARGS
       - name: Commit updated wins log and leaderboard
         run: |
           git config user.name "worlde-winner-bot"
