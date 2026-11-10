@@ -12,7 +12,9 @@ it does its job, and exits. Stats live in `wins.json` in this repo.
 ## Leaderboard
 
 <!-- LEADERBOARD:START -->
-_No winners yet._
+| Player | Wins | Current streak |
+| --- | ---: | ---: |
+| lacasse | 1 | 1 |
 <!-- LEADERBOARD:END -->
 
 ## Setup
