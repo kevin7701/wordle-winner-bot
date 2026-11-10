@@ -19,13 +19,17 @@ Usage:
     python bot.py                          # crown yesterday (Pacific time)
     python bot.py --date 2026-11-09       # crown a specific day (backfill/test)
     python bot.py --date 2026-11-09 --dry-run   # print what would happen, change nothing
+
+Exit codes: 0 success (including "no scores today"), 1 error, 2 bad config.
 """
 
 import argparse
+import asyncio
 import json
 import os
 import re
 import sys
+import traceback
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -41,6 +45,9 @@ WINS_PATH = BASE_DIR / "wins.json"
 README_PATH = BASE_DIR / "README.md"
 
 DEFAULT_ROLE_NAME = "Worlde Winner"
+# A normal run takes seconds. Fail loudly instead of hanging forever, so a
+# stuck scheduled run shows up as failed instead of burning Actions minutes.
+RUN_TIMEOUT_SECONDS = 300
 
 # Matches a Wordle share line, e.g. "Wordle 1,234 3/6" or "Wordle 987 X/6*".
 # The puzzle number has a comma in the official share text, hence [\d,]+.
@@ -82,6 +89,20 @@ def load_wins():
 
 def save_wins(data):
     WINS_PATH.write_text(json.dumps(data, indent=2) + "\n")
+
+
+def previous_holder_ids(data):
+    """User IDs currently holding the role, from the most recent crowned day.
+
+    The bot is the only thing that assigns this role, so the last day's
+    winners are its holders. This deliberately avoids guild.chunk(), which
+    waits for Discord to send the full member list and can hang forever
+    when the Server Members intent is off in the Developer Portal.
+    """
+    if not data["winners"]:
+        return set()
+    latest = max(entry["date"] for entry in data["winners"])
+    return {entry["user_id"] for entry in data["winners"] if entry["date"] == latest}
 
 
 def standings(data):
@@ -158,14 +179,27 @@ class WorldeBot(discord.Client):
         super().__init__(intents=intents)
         self.target_day = target_day
         self.dry_run = dry_run
+        self.exit_code = 0
 
     async def on_ready(self):
         try:
-            await self.crown()
+            self.exit_code = await asyncio.wait_for(
+                self.crown(), timeout=RUN_TIMEOUT_SECONDS
+            )
+        except asyncio.TimeoutError:
+            print(
+                f"ERROR: timed out after {RUN_TIMEOUT_SECONDS // 60} minutes. "
+                "The run was stuck; see the last printed step above."
+            )
+            self.exit_code = 1
+        except Exception:
+            traceback.print_exc()
+            self.exit_code = 1
         finally:
             await self.close()
 
     async def crown(self):
+        """Do the day's crowning. Returns a process exit code (0 ok, 1 error)."""
         guild_id = int(os.environ["GUILD_ID"])
         channel_id = int(os.environ["CHANNEL_ID"])
         role_id = os.environ.get("ROLE_ID") or ""
@@ -173,10 +207,8 @@ class WorldeBot(discord.Client):
 
         guild = self.get_guild(guild_id)
         if guild is None:
-            print(f"Could not find server {guild_id}. Is the bot in it?")
-            raise SystemExit(1)
-        # Make sure the member cache is populated so role.members is accurate.
-        await guild.chunk()
+            print(f"ERROR: could not find server {guild_id}. Is the bot in it?")
+            return 1
 
         channel = guild.get_channel(channel_id)
         if channel is None:
@@ -187,11 +219,15 @@ class WorldeBot(discord.Client):
         else:
             role = discord.utils.get(guild.roles, name=role_name)
         if role is None:
-            print(f'Could not find role "{role_name}". Create it first.')
-            raise SystemExit(1)
+            print(f'ERROR: could not find role "{role_name}". Create it first.')
+            return 1
 
         start, end = day_bounds(self.target_day)
         expected = expected_puzzle_number(self.target_day)
+        print(
+            f"Scanning #{channel.name} for {self.target_day} "
+            f"(Wordle #{expected})..."
+        )
 
         # Best score per (puzzle, user). A user posting twice keeps their best.
         results = {}
@@ -210,7 +246,7 @@ class WorldeBot(discord.Client):
 
         if not results:
             print(f"No Wordle scores found for {self.target_day}. Nothing to crown.")
-            return
+            return 0
 
         puzzles = {puzzle for puzzle, _ in results}
         puzzle = expected if expected in puzzles else max(puzzles)
@@ -236,11 +272,21 @@ class WorldeBot(discord.Client):
 
         if self.dry_run:
             print("Dry run: no roles changed, no files written, no announcement sent.")
-            return
+            return 0
 
-        # Remove the role from yesterday's holders, then crown today's winners.
+        data = load_wins()
+
+        # Remove the role from its current holders, then crown today's winners.
+        # Holders come from the wins log (the bot is the only thing that
+        # assigns this role), plus anyone in role.members if the cache has
+        # them. Nothing here needs the full member list.
+        holder_ids = previous_holder_ids(data)
+        holder_ids.update(member.id for member in role.members)
         try:
-            for member in list(role.members):
+            for user_id in holder_ids:
+                member = guild.get_member(user_id)
+                if member is None:
+                    member = await guild.fetch_member(user_id)
                 await member.remove_roles(role, reason="Worlde Winner: new day")
             for user_id, _ in winners:
                 member = guild.get_member(user_id)
@@ -249,13 +295,12 @@ class WorldeBot(discord.Client):
                 await member.add_roles(role, reason="Worlde Winner")
         except discord.Forbidden:
             print(
-                "Discord refused the role change (403). Check that the bot has the "
-                '"Manage Roles" permission and that its own role sits ABOVE '
-                f'"{role.name}" in Server Settings > Roles.'
+                "ERROR: Discord refused the role change (403). Check that the bot "
+                'has the "Manage Roles" permission and that its own role sits '
+                f'ABOVE "{role.name}" in Server Settings > Roles.'
             )
-            raise SystemExit(1)
+            return 1
 
-        data = load_wins()
         for user_id, message in winners:
             data["winners"].append(
                 {
@@ -285,6 +330,7 @@ class WorldeBot(discord.Client):
         )
         await channel.send(announcement)
         print("Crowned and announced.")
+        return 0
 
 
 def main():
@@ -317,7 +363,7 @@ def main():
 
     bot = WorldeBot(target_day=target_day, dry_run=args.dry_run)
     bot.run(token)
-    return 0
+    return bot.exit_code
 
 
 if __name__ == "__main__":
