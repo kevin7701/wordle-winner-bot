@@ -328,8 +328,10 @@ class WorldeBot(discord.Client):
             f"{headline}\n\n"
             f"**All-time standings**\n{format_standings(data)}"
         )
-        await channel.send(announcement)
-        print("Crowned and announced.")
+        # silent=True keeps the @mentions visible but sends no push or
+        # desktop notification, so nobody gets woken up by the announcement.
+        await channel.send(announcement, silent=True)
+        print("Crowned and announced (silent, no ping).")
         return 0
 
 

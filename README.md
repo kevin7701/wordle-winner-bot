@@ -67,9 +67,10 @@ Then go to Settings > Actions > General > Workflow permissions and set
 `wins.json` and leaderboard back to the repo.
 
 The schedule is `5 8 * * *` (08:05 UTC daily). That is 12:05am PST in
-winter and 1:05am PDT in summer; the script always looks back at the full
-previous Pacific day, so daylight saving needs no handling and the schedule
-never changes.
+winter and 1:05am PDT in summer. The announcement @mentions the winners but
+is sent silently, so the midnight run does not wake anyone up. The script
+always looks back at the full previous Pacific day, so daylight saving needs
+no handling and the schedule never changes.
 
 ### 5. Test it
 
