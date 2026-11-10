@@ -1,11 +1,11 @@
-# Worlde Winner bot
+# Wordle Winner bot
 
 Once a day, just after midnight Pacific time, this bot scans a Discord channel
 for yesterday's Wordle and Connections scores, gives everyone tied at the
 best score the prize role, records the win, and announces it in the channel.
 
 - **Wordle:** lowest guess count wins; a failed puzzle (`X/6`) counts as 7.
-  Ties share the **Worlde Winner** role, there is no tie-break.
+  Ties share the **Wordle Winner** role, there is no tie-break.
 - **Connections:** fewest guesses wins, where guesses is the number of rows
   in the share (4 is a perfect solve, 8 is a failure). Ties share the
   **Connections Connoisseur** role, there is no tie-break.
@@ -47,7 +47,7 @@ it does its job, and exits. Stats live in `wins.json` (Wordle) and
 
 ### 2. Create the roles and invite the bot
 
-1. In your server, create the roles **Worlde Winner** and
+1. In your server, create the roles **Wordle Winner** and
    **Connections Connoisseur** (any color, no special permissions needed).
 2. Invite the bot with this link (replace `YOUR_CLIENT_ID` with the
    Application ID from the portal's General Information page):
@@ -75,7 +75,7 @@ Push this folder to a repo, then add repository secrets
 | `DISCORD_TOKEN` | the bot token from step 1 |
 | `GUILD_ID` | the server ID |
 | `CHANNEL_ID` | the channel ID (Wordle and Connections are posted here) |
-| `WORDLE_ROLE_ID` | the Worlde Winner role ID (optional; if empty the bot finds it by name) |
+| `WORDLE_ROLE_ID` | the Wordle Winner role ID (optional; if empty the bot finds it by name) |
 | `CONNECTIONS_ROLE_ID` | the Connections Connoisseur role ID (optional; if empty the bot finds it by name) |
 
 Then go to Settings > Actions > General > Workflow permissions and set

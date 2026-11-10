@@ -1,4 +1,4 @@
-"""Worlde Winner bot.
+"""Wordle Winner bot.
 
 One-shot script, meant to be run once a day by a scheduler (GitHub Actions).
 It wakes up, scans a Discord channel for yesterday's Wordle and Connections
@@ -22,7 +22,7 @@ Configuration (environment variables; see .env.example):
     GUILD_ID              server ID
     CHANNEL_ID            Wordle/Connections channel ID
     WORDLE_ROLE_ID        optional; if empty, the Wordle role is found by name
-    WORDLE_ROLE_NAME      optional, default "Worlde Winner"
+    WORDLE_ROLE_NAME      optional, default "Wordle Winner"
     CONNECTIONS_ROLE_ID   optional; if empty, the Connections role is found by name
     CONNECTIONS_ROLE_NAME optional, default "Connections Connoisseur"
 
@@ -60,7 +60,7 @@ WINS_PATH = BASE_DIR / "wins.json"
 CONNECTIONS_WINS_PATH = BASE_DIR / "connections-wins.json"
 README_PATH = BASE_DIR / "README.md"
 
-DEFAULT_WORDLE_ROLE_NAME = "Worlde Winner"
+DEFAULT_WORDLE_ROLE_NAME = "Wordle Winner"
 DEFAULT_CONNECTIONS_ROLE_NAME = "Connections Connoisseur"
 # A normal run takes seconds. Fail loudly instead of hanging forever, so a
 # stuck scheduled run shows up as failed instead of burning Actions minutes.
@@ -294,7 +294,7 @@ def wordle_section(target_day, info):
             "(Tied scores share the role.)"
         )
     return (
-        f"🏆 **Worlde Winner, {target_day:%B %d, %Y}**\n"
+        f"🏆 **Wordle Winner, {target_day:%B %d, %Y}**\n"
         f"{headline}\n\n"
         f"**All-time standings**\n{format_standings(data)}"
     )
@@ -389,7 +389,7 @@ def games_to_run(games):
     return set(GAME_KEYS)
 
 
-class WorldeBot(discord.Client):
+class WordleBot(discord.Client):
     def __init__(self, *, target_day, dry_run, games="both"):
         intents = discord.Intents.default()
         intents.message_content = True
@@ -556,7 +556,7 @@ class WorldeBot(discord.Client):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Crown the daily Worlde Winner.")
+    parser = argparse.ArgumentParser(description="Crown the daily Wordle Winner.")
     parser.add_argument(
         "--date",
         help="Target day as YYYY-MM-DD (default: yesterday, Pacific time)",
@@ -589,7 +589,7 @@ def main():
             print(f"{variable} is not set. See .env.example.")
             return 2
 
-    bot = WorldeBot(target_day=target_day, dry_run=args.dry_run, games=args.games)
+    bot = WordleBot(target_day=target_day, dry_run=args.dry_run, games=args.games)
     bot.run(token)
     return bot.exit_code
 
