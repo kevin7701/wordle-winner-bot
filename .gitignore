@@ -1,0 +1,7 @@
+# Secrets: your real token and IDs. Never commit this.
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/

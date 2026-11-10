@@ -7,7 +7,7 @@ name: Crown Worlde Winner
 # is sent silently, so the midnight run does not wake anyone up.
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "5 8 * * *"
   workflow_dispatch:
     inputs:
       date:
@@ -19,6 +19,15 @@ on:
         required: false
         type: boolean
         default: false
+      games:
+        description: "Which games to crown"
+        required: false
+        type: choice
+        default: both
+        options:
+          - both
+          - wordle
+          - connections
 
 permissions:
   contents: write
@@ -43,16 +52,18 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           GUILD_ID: ${{ secrets.GUILD_ID }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-          ROLE_ID: ${{ secrets.ROLE_ID }}
+          WORDLE_ROLE_ID: ${{ secrets.WORDLE_ROLE_ID }}
+          CONNECTIONS_ROLE_ID: ${{ secrets.CONNECTIONS_ROLE_ID }}
         run: |
           ARGS=""
           if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ -n "${{ inputs.games }}" ]; then ARGS="$ARGS --games ${{ inputs.games }}"; fi
           python bot.py $ARGS
-      - name: Commit updated wins log and leaderboard
+      - name: Commit updated wins logs and leaderboards
         run: |
           git config user.name "worlde-winner-bot"
           git config user.email "worlde-winner-bot@users.noreply.github.com"
-          git add wins.json README.md
+          git add wins.json connections-wins.json README.md
           git diff --cached --quiet || git commit -m "Record winners for $(date -u +%F) [skip ci]"
           git push
