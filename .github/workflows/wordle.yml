@@ -7,7 +7,7 @@ name: Crown Wordle Winner
 # is sent silently, so the midnight run does not wake anyone up.
 on:
   schedule:
-    - cron: "5 8 * * *"
+    - cron: "0 8 * * *"
   workflow_dispatch:
     inputs:
       date:
