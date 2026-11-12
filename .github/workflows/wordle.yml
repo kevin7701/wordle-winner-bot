@@ -1,13 +1,13 @@
 name: Crown Wordle Winner
 
 # Runs once a day, just after midnight Pacific time. GitHub cron is UTC-only,
-# so 08:05 UTC is 12:05am PST in winter and 1:05am PDT in summer. Either way
+# so 08:05 UTC is 12:12am PST in winter and 1:12am PDT in summer. Either way
 # the script looks back at the full previous Pacific day, so daylight saving
 # needs no handling here and this file never changes for it. The announcement
 # is sent silently, so the midnight run does not wake anyone up.
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "12 8 * * *"
   workflow_dispatch:
     inputs:
       date:
