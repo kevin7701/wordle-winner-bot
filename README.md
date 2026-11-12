@@ -21,10 +21,10 @@ it does its job, and exits. Stats live in `wins.json` (Wordle) and
 <!-- LEADERBOARD:START -->
 | Player | Wins | Current streak |
 | --- | ---: | ---: |
-| lacasse | 2 | 2 |
-| bluenuke0 | 1 | 1 |
-| duskyh | 1 | 1 |
-| Kev | 1 | 1 |
+| lacasse | 3 | 3 |
+| duskyh | 2 | 2 |
+| Kev | 2 | 2 |
+| bluenuke0 | 1 | 0 |
 <!-- LEADERBOARD:END -->
 
 ### Connections
@@ -32,7 +32,8 @@ it does its job, and exits. Stats live in `wins.json` (Wordle) and
 <!-- CONNECTIONS_LEADERBOARD:START -->
 | Player | Wins | Current streak |
 | --- | ---: | ---: |
-| lacasse | 2 | 2 |
+| lacasse | 3 | 3 |
+| Kev | 1 | 1 |
 <!-- CONNECTIONS_LEADERBOARD:END -->
 
 ## Setup
