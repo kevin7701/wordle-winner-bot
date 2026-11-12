@@ -28,6 +28,11 @@ on:
           - both
           - wordle
           - connections
+      force:
+        description: "Force: re-crown even if the day is already recorded"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -59,6 +64,7 @@ jobs:
           if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ -n "${{ inputs.games }}" ]; then ARGS="$ARGS --games ${{ inputs.games }}"; fi
+          if [ "${{ inputs.force }}" = "true" ]; then ARGS="$ARGS --force"; fi
           python bot.py $ARGS
       - name: Commit updated wins logs and leaderboards
         run: |

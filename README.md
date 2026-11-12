@@ -86,7 +86,7 @@ Then go to Settings > Actions > General > Workflow permissions and set
 **Read and write permissions**, so the workflow can commit the updated
 wins logs and leaderboards back to the repo.
 
-The schedule is `12 8 * * *` (08:05 UTC daily). That is 12:12am PST in
+The schedule is `12 8 * * *` (08:12 UTC daily). That is 12:12am PST in
 winter and 1:12am PDT in summer. The announcement @mentions the winners but
 is sent silently, so the midnight run does not wake anyone up. The script
 always looks back at the full previous Pacific day, so daylight saving needs
@@ -104,6 +104,12 @@ games dropdown to run only Wordle or only Connections, which is handy for
 testing one game without touching the other. Check the run log and the
 channel to confirm the roles were assigned.
 
+Re-running a day that is already recorded in the wins log is a no-op: the
+bot prints that the day was already crowned and skips it, so a late
+scheduled run after a manual run cannot append duplicate winners or
+announce twice. To deliberately re-crown a day (for example to fix a wrong
+result), tick the force box in the manual run, or pass `--force` locally.
+
 ## Running it locally
 
 ```bash
@@ -113,6 +119,7 @@ pip install -r requirements.txt
 cp .env.example .env            # fill in the values
 python bot.py --date 2026-11-09 --dry-run   # prints what would happen, changes nothing
 python bot.py --date 2026-11-09             # crowns that day for real
+python bot.py --date 2026-11-09 --force     # re-crown a day already in the wins log
 python bot.py --games connections --dry-run  # dry run Connections only
 python bot.py --games wordle                 # crown Wordle only, for real
 ```
@@ -163,4 +170,9 @@ With no `--date`, it crowns yesterday (Pacific time).
   one combined, silent message. If one game has no scores that day, its
   section is left out; if a game's role is missing or a role change fails,
   the other game still crowns and the run reports the error.
+- Re-runs are idempotent: if a game's wins log already has an entry for the
+  target day, that game is skipped (no role changes, no file writes, no
+  announcement section). The wins log is only written after the role
+  changes succeed, so a recorded day is a crowned day. Pass `--force` (or
+  tick the force box on a manual run) to re-crown a day deliberately.
 - Run `python test_bot.py` to check the parsing and scoring logic.

@@ -6,6 +6,7 @@ Run: python test_bot.py (needs discord.py and python-dotenv installed).
 from datetime import date
 
 from bot import (
+    already_crowned,
     choose_puzzle,
     day_bounds,
     expected_connections_number,
@@ -164,6 +165,13 @@ def test_game_registry():
         assert len(game.leaderboard_markers) == 2
 
 
+def test_already_crowned():
+    data = {"winners": [{"date": "2026-11-11", "user_id": 1}]}
+    assert already_crowned(data, date(2026, 11, 11)) is True
+    assert already_crowned(data, date(2026, 11, 12)) is False
+    assert already_crowned({"winners": []}, date(2026, 11, 11)) is False
+
+
 def test_day_bounds():
     start, end = day_bounds(date(2026, 11, 9))
     assert (end - start).days == 1
@@ -185,6 +193,7 @@ if __name__ == "__main__":
         test_pick_winners,
         test_games_to_run,
         test_game_registry,
+        test_already_crowned,
         test_day_bounds,
     ]
     for test in tests:

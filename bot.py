@@ -30,6 +30,7 @@ Usage:
     python bot.py                          # crown yesterday (Pacific time)
     python bot.py --date 2026-11-09       # crown a specific day (backfill/test)
     python bot.py --date 2026-11-09 --dry-run   # print what would happen, change nothing
+    python bot.py --date 2026-11-09 --force      # re-crown a day already in the wins log
     python bot.py --games connections --dry-run  # dry run Connections only
     python bot.py --games wordle                 # crown Wordle only, for real
 
@@ -165,6 +166,18 @@ def load_wins(path):
     if not path.exists():
         return {"winners": []}
     return json.loads(path.read_text())
+
+
+def already_crowned(data, target_day):
+    """True if this game's wins log already has an entry for target_day.
+
+    The wins file is only written after the role changes succeed, so a
+    recorded day is a crowned day. Used to make re-runs idempotent: a
+    late scheduled run re-crowning a day a manual run already crowned
+    must not append duplicate winners or announce twice.
+    """
+    day = target_day.isoformat()
+    return any(entry["date"] == day for entry in data["winners"])
 
 
 def save_wins(data, path):
@@ -390,7 +403,7 @@ def games_to_run(games):
 
 
 class WordleBot(discord.Client):
-    def __init__(self, *, target_day, dry_run, games="both"):
+    def __init__(self, *, target_day, dry_run, games="both", force=False):
         intents = discord.Intents.default()
         intents.message_content = True
         intents.members = True
@@ -398,6 +411,7 @@ class WordleBot(discord.Client):
         self.target_day = target_day
         self.dry_run = dry_run
         self.games = games_to_run(games)
+        self.force = force
         self.exit_code = 0
 
     async def on_ready(self):
@@ -459,10 +473,23 @@ class WordleBot(discord.Client):
             f"winner(s): {winner_names}"
         )
 
-        if self.dry_run:
+        # The wins file is the record of crowned days, and it is only
+        # written after the role changes succeed, so "recorded" means
+        # "crowned". Skip a day that is already there instead of
+        # appending duplicate winners and announcing twice (e.g. a late
+        # scheduled run after a manual run already crowned the day).
+        # --force overrides this for a deliberate re-crown. The check
+        # runs before the dry-run return so a dry run reports the skip.
+        data = load_wins(game.wins_path)
+        if not self.force and already_crowned(data, self.target_day):
+            print(
+                f"{game.name} {self.target_day} was already crowned. "
+                "Skipping (use --force to re-crown)."
+            )
             return None, False
 
-        data = load_wins(game.wins_path)
+        if self.dry_run:
+            return None, False
 
         # Remove the role from its current holders, then crown today's winners.
         # Holders come from the wins log (the bot is the only thing that
@@ -572,6 +599,11 @@ def main():
         default="both",
         help="Which games to crown (default: both)",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-crown even if the day is already recorded in the wins log",
+    )
     args = parser.parse_args()
 
     if args.date:
@@ -589,7 +621,12 @@ def main():
             print(f"{variable} is not set. See .env.example.")
             return 2
 
-    bot = WordleBot(target_day=target_day, dry_run=args.dry_run, games=args.games)
+    bot = WordleBot(
+        target_day=target_day,
+        dry_run=args.dry_run,
+        games=args.games,
+        force=args.force,
+    )
     bot.run(token)
     return bot.exit_code
 
