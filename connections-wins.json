@@ -31,6 +31,22 @@
       "display_name": "Kev",
       "guesses": 4,
       "message_id": 1570165516985958481
+    },
+    {
+      "date": "2026-11-12",
+      "puzzle": 1250,
+      "user_id": 323753835942117376,
+      "display_name": "bluenuke0",
+      "guesses": 4,
+      "message_id": 1570350638225948753
+    },
+    {
+      "date": "2026-11-12",
+      "puzzle": 1250,
+      "user_id": 320762218507534338,
+      "display_name": "lacasse",
+      "guesses": 4,
+      "message_id": 1570478204882391133
     }
   ]
 }
