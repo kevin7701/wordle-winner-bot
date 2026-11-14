@@ -47,6 +47,22 @@
       "display_name": "lacasse",
       "guesses": 4,
       "message_id": 1570478204882391133
+    },
+    {
+      "date": "2026-11-13",
+      "puzzle": 1251,
+      "user_id": 361736588474056704,
+      "display_name": "gh0st",
+      "guesses": 4,
+      "message_id": 1570860615814353100
+    },
+    {
+      "date": "2026-11-13",
+      "puzzle": 1251,
+      "user_id": 261582873180504064,
+      "display_name": "Kev",
+      "guesses": 4,
+      "message_id": 1571035086231576667
     }
   ]
 }
