@@ -21,10 +21,10 @@ it does its job, and exits. Stats live in `wins.json` (Wordle) and
 <!-- LEADERBOARD:START -->
 | Player | Wins | Current streak |
 | --- | ---: | ---: |
-| lacasse | 6 | 3 |
-| bluenuke0 | 3 | 0 |
-| brioche | 3 | 3 |
-| Kev | 3 | 0 |
+| lacasse | 7 | 4 |
+| bluenuke0 | 4 | 1 |
+| Kev | 4 | 1 |
+| brioche | 3 | 0 |
 | duskyh | 2 | 0 |
 | gh0st | 2 | 0 |
 <!-- LEADERBOARD:END -->
