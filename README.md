@@ -21,13 +21,13 @@ it does its job, and exits. Stats live in `wins.json` (Wordle) and
 <!-- LEADERBOARD:START -->
 | Player | Wins | Current streak |
 | --- | ---: | ---: |
-| lacasse | 7 | 0 |
-| bluenuke0 | 5 | 2 |
-| brioche | 4 | 1 |
+| lacasse | 8 | 1 |
+| bluenuke0 | 5 | 0 |
+| brioche | 5 | 2 |
+| gh0st | 4 | 2 |
 | Kev | 4 | 0 |
-| gh0st | 3 | 1 |
 | duskyh | 2 | 0 |
-| suv | 1 | 1 |
+| suv | 1 | 0 |
 <!-- LEADERBOARD:END -->
 
 ### Connections
@@ -35,7 +35,7 @@ it does its job, and exits. Stats live in `wins.json` (Wordle) and
 <!-- CONNECTIONS_LEADERBOARD:START -->
 | Player | Wins | Current streak |
 | --- | ---: | ---: |
-| lacasse | 7 | 3 |
+| lacasse | 8 | 1 |
 | bluenuke0 | 2 | 0 |
 | Kev | 2 | 0 |
 | gh0st | 1 | 0 |
